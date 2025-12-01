@@ -1,17 +1,12 @@
-from settings import base_set
-from routers import APIRoutes
-from models.models import ResponseModel
-import logging
-
-logger = logging.getLogger("Custom log metrics")
+from api.routers import APIRoutes
 
 
-class Swapi:
-    def __init__(self, client):
-        self.url = base_set.api_url
+class UsersAPI:
+    """API обертка для сущности Users"""
+
+    def __init__(self, client, base_url: str):
         self.client = client
+        self.base_url = base_url
 
-    async def metrics_get(self, page: int = None):
-        response = self.client.custom_request("GET", f"{self.url}{APIRoutes.METR}", params=page)
-        logger.info(f'В GET metrics получаем код ответа: {response.status_code}')
-        return ResponseModel(status=response.status_code, response=response.json(), headers=response.headers)
+    def get_user(self, user_id: int):
+        return self.client.get(f'{self.base_url}/{APIRoutes.PLAN}/{user_id}')

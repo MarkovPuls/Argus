@@ -1,28 +1,35 @@
 import requests
-
-
-class ClientRequests:
-    def __init__(self, base_url=''):
-        self.base_url = base_url
-
-    def get_posts(self):
-        return requests.get(f'{self.base_url}/posts')
-
-
-@pytest.fixture(scope='module')
-def client():
-    return JsonPlaceholderClient()
-
-
+import logging
 import allure
-from httpx import Client, Response
+from clients.base import BaseClient
+from common.fixtures import log_request, measure_time
+from models.models import ResponseModel
+
+logger = logging.getLogger('RequestsClient')
 
 
-class ClientHTTPx:
-    def __init__(self, sync_client=None):
-        self.sync_client: Client = sync_client
+class RequestsClient(BaseClient):
+    @allure.step('GET Requests')
+    @log_request('GET Requests')
+    @measure_time
+    def get(self, url, **kwargs):
+        res = requests.get(url, **kwargs)
+        return ResponseModel(code=res.status_code, status=res.reason, response=res.json(), time=None)
 
-    @allure.step('Making sync client request')
-    def sync_custom_request(self, method: str, url: str, **kwargs) -> Response:
-        request = self.sync_client.build_request(method, url, **kwargs)
-        return self.sync_client.send(request)
+    @allure.step('POST Requests')
+    @log_request('POST Requests')
+    def post(self, url, json=None, **kwargs):
+        res = requests.post(url, json=json, **kwargs)
+        return ResponseModel(code=res.status_code, status=res.reason, response=res.json(), time=None)
+
+    @allure.step('PUT Requests')
+    @log_request('PUT Requests')
+    def put(self, url, json=None, **kwargs):
+        res = requests.post(url, json=json, **kwargs)
+        return ResponseModel(code=res.status_code, status=res.reason, response=res.json(), time=None)
+
+    @allure.step('DELETE Requests')
+    @log_request('DELETE Requests')
+    def delete(self, url, **kwargs):
+        res = requests.delete(url, **kwargs)
+        return ResponseModel(code=res.status_code, status=res.reason, response=res.json(), time=None)
