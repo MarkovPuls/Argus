@@ -19,11 +19,11 @@ class Settings(BaseSettings):
 
     @property
     def api_url(self) -> str:
-        return f'https://{self.base_url}/api/'
+        return f'https://{self.base_url}/'
 
 
 try:
-    base_set = Settings()
+    base_settings = Settings()
 except ValidationError as e:
     print('Validation Error in settings:', e)
     raise

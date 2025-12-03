@@ -8,3 +8,4 @@ pytest-playwright==0.7.2
 requests==2.32.4
 httpx==0.28.1
 locust==2.42.5
+playwright==1.56.0

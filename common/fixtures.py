@@ -1,31 +1,25 @@
-from datetime import datetime
-from functools import wraps
-import logging
-
-logger = logging.getLogger('Fixture')
-
-
-def measure_time(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        start_time = datetime.now()
-        response = func(*args, **kwargs)
-        duration_ms = (datetime.now() - start_time).total_seconds() * 1000
-        response.time = duration_ms
-        logger.info(f"Request {func.__name__} занял: {duration_ms:.2f} ms")
-        return response
-    return wrapper
+import pytest
+from clients.request_client import RequestsClient
+from clients.httpx_client import HttpxClient
+from clients.api_client import APIClient
 
 
-def log_request(method_name: str):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(self, url, *args, **kwargs):
-            body = kwargs.get('json') or kwargs
-            logger.info(f'REQUESTS {method_name} → {url} | params/body={body}')
-            res = func(self, url, *args, **kwargs)
-            logger.info(f'RESPONSE ← {res.code} {res.status} | url={url}')
-            return res
-        return wrapper
-    return decorator
+def pytest_addoption(parser):
+    parser.addoption(
+        '--client',
+        action='store',
+        default='requests',
+        choices=['requests', 'httpx'],
+        help='Выбор HTTP клиента',
+    )
 
+
+@pytest.fixture(scope='session')
+def http_client(request):
+    selected = request.config.getoption('--client')
+    return RequestsClient() if selected == 'requests' else HttpxClient()
+
+
+@pytest.fixture(scope='session')
+def api_client(http_client):
+    return APIClient(http_client)

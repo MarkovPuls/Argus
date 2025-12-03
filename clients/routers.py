@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class APIRoutes(str, Enum):
+class APIRoutes(Enum):
     PEOP = 'people'
     PLAN = 'planets'
     FILM = 'films'
